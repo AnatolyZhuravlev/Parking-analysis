@@ -39,7 +39,7 @@ hsv = cv2.cvtColor(imgParkingFull, cv2.COLOR_BGR2HSV)
 # применяем цветовой фильтр
 thresh = cv2.inRange(hsv, hsv_min, hsv_max)
 # Ищем контуры на изображении
-im, contours0, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+contours0, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
 # cv2.imshow("linesDetected", contours0)
 
@@ -77,7 +77,7 @@ hsv = cv2.cvtColor(blank_image, cv2.COLOR_BGR2HSV)
 # применяем цветовой фильтр
 thresh = cv2.inRange(hsv, hsv_min, hsv_max)
 
-im, contours0, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+contours0, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
 boxArr = [];
 # перебираем все найденные контуры в цикле
@@ -96,6 +96,7 @@ for cnt in contours0:
 
 # Вывод финального изображения
 cv2.imwrite("ProcessedImage.jpg", imgParkingFull)
+cv2.imshow("ProcesseedImage", imgParkingFull)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
