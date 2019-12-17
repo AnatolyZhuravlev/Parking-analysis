@@ -26,7 +26,6 @@ for line in lines:
     x1, y1, x2, y2 = line[0]
     cv2.line(blank_image_parking, (x1, y1), (x2, y2), (255, 255, 255), 2)
 
-cv2.imwrite("test.jpg", blank_image_parking)
 
 # Создание пустого изоброжения для определения машин
 blank_image_cars = np.zeros((1080, 1920, 3), np.uint8)
@@ -40,7 +39,7 @@ hsv = cv2.cvtColor(imgParkingFull, cv2.COLOR_BGR2HSV)
 # применяем цветовой фильтр
 thresh = cv2.inRange(hsv, hsv_min, hsv_max)
 # Ищем контуры на изображении
-contours0, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+im, contours0, hierarchy = cv2.findContours(thresh.copy(), cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
 # cv2.imshow("linesDetected", contours0)
 
@@ -60,6 +59,43 @@ for cnt in contours0:
         cv2.drawContours(imgParkingFull, [box], 0, (0, 255, 0), 2)
         boxArr.append(box)
 
-# Сохранение контуров машин и линий парковки
+# Сохранение полученой маски и линий парковки
 # cv2.imwrite("lines.jpg", blank_image_parking)
-cv2.imwrite("cars.jpg", blank_image_cars)
+# cv2.imwrite("mask.jpg", blank_image_result)
+
+# Наложение маски, чтобы определить пересечение линий
+# blank_image = np.zeros((1080, 1920, 3), np.uint8)
+blank_image = cv2.bitwise_and(blank_image_parking, blank_image_cars, blank_image_cars)
+
+# Сохранение результата пересечения
+#cv2.imwrite("result.jpg", blank_image)
+
+hsv_min = np.array((0, 0, 0), np.uint8)
+hsv_max = np.array((255,0,0), np.uint8)
+# меняем цветовую модель с BGR на HSV
+hsv = cv2.cvtColor(blank_image, cv2.COLOR_BGR2HSV)
+# применяем цветовой фильтр
+thresh = cv2.inRange(hsv, hsv_min, hsv_max)
+
+im, contours0, hierarchy = cv2.findContours(thresh, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+boxArr = [];
+# перебираем все найденные контуры в цикле
+for cnt in contours0:
+    # пытаемся вписать прямоугольник
+    rect = cv2.minAreaRect(cnt)
+    # поиск четырех вершин прямоугольника
+    box = cv2.boxPoints(rect)
+    # округление координат
+    box = np.int0(box)
+    # вычисление площади
+    area = int(rect[1][0] * rect[1][1])
+    if area < 5000:
+        cv2.drawContours(imgParkingFull, [box], 0, (0, 0, 255), 2)
+        boxArr.append(box)
+
+# Вывод финального изображения
+cv2.imwrite("ProcessedImage.jpg", imgParkingFull)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
